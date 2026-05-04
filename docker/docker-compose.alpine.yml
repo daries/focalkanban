@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  focalboard:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.alpine
+    container_name: focalboard-alpine
+    restart: always
+    ports:
+      - "80:8000"
+    volumes:
+      - ./data:/opt/focalboard/data
+      - ./server_config.json:/opt/focalboard/config.json
+    environment:
+      - NODE_ENV=production
