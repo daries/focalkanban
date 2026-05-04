@@ -1,8 +1,8 @@
 # Stage 1: Build the Webapp
-FROM node:16-buster-slim AS nodebuild
+FROM node:18-bullseye-slim AS nodebuild
 
 # Install build dependencies for imagemin/optipng
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     autoconf \
     automake \
     libtool \
