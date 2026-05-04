@@ -1,19 +1,20 @@
 # Stage 1: Build the Webapp
-FROM node:18-bullseye-slim AS nodebuild
+FROM node:18-alpine AS nodebuild
 
 # Install build dependencies for imagemin/optipng
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# libc6-compat and gcompat are needed for some pre-compiled binaries in Alpine
+RUN apk add --no-cache \
     autoconf \
     automake \
     libtool \
     make \
     gcc \
     g++ \
-    sqlite-dev \
-    zlib1g-dev \
+    zlib-dev \
     libpng-dev \
-    nasm && \
-    rm -rf /var/lib/apt/lists/*
+    nasm \
+    libc6-compat \
+    gcompat
 
 WORKDIR /webapp
 COPY webapp/package*.json ./
@@ -23,7 +24,7 @@ RUN npm run pack
 
 # Stage 2: Build the Server
 FROM golang:1.21-alpine AS gobuild
-RUN apk add --no-cache make git gcc musl-dev pkgconfig
+RUN apk add --no-cache make git gcc musl-dev pkgconfig sqlite-dev
 WORKDIR /go/src/focalboard
 COPY . .
 WORKDIR /go/src/focalboard/server
