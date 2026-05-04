@@ -22,13 +22,15 @@ RUN npm run pack
 
 # Stage 2: Build the Server
 FROM golang:1.21-alpine AS gobuild
-RUN apk add --no-cache make git
+RUN apk add --no-cache make git gcc musl-dev
 WORKDIR /go/src/focalboard
 COPY . .
 WORKDIR /go/src/focalboard/server
+# Download dependencies first for caching
+RUN go mod download
 # Build static binary without CGO
 # Focalboard uses modernc.org/sqlite which is CGO-free
-RUN CGO_ENABLED=0 go build -ldflags="-s -w" -tags 'json1 sqlite3' -o ../bin/focalboard-server ./main
+RUN CGO_ENABLED=0 go build -v -ldflags="-s -w" -tags 'json1 sqlite3' -o ../bin/focalboard-server ./main
 
 # Stage 3: Final Image
 FROM alpine:3.18
