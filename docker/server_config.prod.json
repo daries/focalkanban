@@ -1,0 +1,15 @@
+{
+    "serverRoot": "https://yourdomain.com",
+    "port": 8000,
+    "dbtype": "postgres",
+    "dbconfig": "postgres://focalboarduser:your_secure_password@db:5432/focalboard?sslmode=disable",
+    "useSSL": false,
+    "webpath": "./pack",
+    "filespath": "./data/files",
+    "telemetry": true,
+    "session_expire_time": 2592000,
+    "session_refresh_time": 18000,
+    "localOnly": false,
+    "enableLocalMode": true,
+    "localModeSocketLocation": "/var/tmp/focalboard_local.socket"
+}

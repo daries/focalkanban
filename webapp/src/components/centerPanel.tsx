@@ -54,6 +54,7 @@ import Kanban from './kanban/kanban'
 import Table from './table/table'
 
 import CalendarFullView from './calendar/fullCalendar'
+import Gantt from './gantt/gantt'
 
 import CardLimitNotification from './cardLimitNotification'
 
@@ -487,6 +488,18 @@ const CenterPanel = (props: Props) => {
                 />}
             {activeView.fields.viewType === 'calendar' &&
                 <CalendarFullView
+                    board={props.board}
+                    cards={props.cards}
+                    activeView={props.activeView}
+                    readonly={props.readonly}
+                    dateDisplayProperty={props.dateDisplayProperty}
+                    showCard={showCard}
+                    addCard={(properties: Record<string, string>) => {
+                        addCard('', true, properties)
+                    }}
+                />}
+            {activeView.fields.viewType === 'gantt' &&
+                <Gantt
                     board={props.board}
                     cards={props.cards}
                     activeView={props.activeView}

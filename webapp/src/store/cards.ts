@@ -299,22 +299,13 @@ function sortCards(cards: Card[], lastCommentByCard: {[key: string]: CommentBloc
                     }
 
                     if (template.type === 'multiPerson') {
-                        aValue = Array.isArray(aValue) && aValue.length !== 0 && Object.keys(usersById).length > 0 ? aValue.map((id) => {
-                            if (usersById[id] !== undefined) {
-                                return usersById[id].username
-                            }
-                            return ''
-                        }).toString() : aValue
-
-                        bValue = Array.isArray(bValue) && bValue.length !== 0 && Object.keys(usersById).length > 0 ? bValue.map((id) => {
-                            if (usersById[id] !== undefined) {
-                                return usersById[id].username
-                            }
-                            return ''
-                        }).toString() : bValue
+                        aValue = Array.isArray(aValue) ? aValue.map((id) => usersById[id]?.username || id).join(', ') : (aValue || '').toString()
+                        bValue = Array.isArray(bValue) ? bValue.map((id) => usersById[id]?.username || id).join(', ') : (bValue || '').toString()
                     }
 
-                    result = (aValue as string).localeCompare(bValue as string)
+                    const aString = (aValue || '').toString()
+                    const bString = (bValue || '').toString()
+                    result = aString.localeCompare(bString)
                 }
 
                 if (result === 0) {

@@ -1,0 +1,50 @@
+# Stage 1: Build the Webapp
+FROM node:16-buster-slim AS nodebuild
+
+# Install build dependencies for imagemin/optipng
+RUN apt-get update && apt-get install -y \
+    autoconf \
+    automake \
+    libtool \
+    make \
+    gcc \
+    g++ \
+    zlib1g-dev \
+    libpng-dev \
+    nasm && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /webapp
+COPY webapp/package*.json ./
+RUN npm install --no-optional
+COPY webapp/ .
+RUN npm run pack
+
+# Stage 2: Build the Server
+FROM golang:1.21-alpine AS gobuild
+RUN apk add --no-cache make git
+WORKDIR /go/src/focalboard
+COPY . .
+WORKDIR /go/src/focalboard/server
+# Build static binary without CGO
+# Focalboard uses modernc.org/sqlite which is CGO-free
+RUN CGO_ENABLED=0 go build -ldflags="-s -w" -tags 'json1 sqlite3' -o ../bin/focalboard-server ./main
+
+# Stage 3: Final Image
+FROM alpine:3.18
+RUN apk add --no-cache ca-certificates tzdata
+RUN addgroup -S focalboard && adduser -S focalboard -G focalboard
+
+WORKDIR /opt/focalboard
+COPY --from=nodebuild --chown=focalboard:focalboard /webapp/pack pack/
+COPY --from=gobuild --chown=focalboard:focalboard /go/src/focalboard/bin/focalboard-server bin/
+COPY --from=gobuild --chown=focalboard:focalboard /go/src/focalboard/LICENSE.txt LICENSE.txt
+COPY --from=gobuild --chown=focalboard:focalboard /go/src/focalboard/docker/server_config.json config.json
+
+RUN mkdir -p /opt/focalboard/data/files && \
+    chown -R focalboard:focalboard /opt/focalboard
+
+USER focalboard
+EXPOSE 8000
+VOLUME /opt/focalboard/data
+CMD ["/opt/focalboard/bin/focalboard-server"]

@@ -17,6 +17,7 @@ import CalendarIcon from '../widgets/icons/calendar'
 import DeleteIcon from '../widgets/icons/delete'
 import DuplicateIcon from '../widgets/icons/duplicate'
 import GalleryIcon from '../widgets/icons/gallery'
+import GanttIcon from '../widgets/icons/gantt'
 import TableIcon from '../widgets/icons/table'
 import Menu from '../widgets/menu'
 
@@ -210,6 +211,60 @@ const ViewMenu = (props: Props) => {
             })
     }, [props.board, props.activeView, props.intl, showView])
 
+    const handleAddViewGantt = useCallback(async () => {
+        const {board, activeView, intl} = props
+
+        Utils.log('addview-gantt')
+
+        // Check and add Start/End date properties if they don't exist
+        const hasStart = board.cardProperties.some((p) => p.name.toLowerCase().includes('start') || p.name.toLowerCase().includes('mulai'))
+        const hasEnd = board.cardProperties.some((p) => p.name.toLowerCase().includes('end') || p.name.toLowerCase().includes('selesai'))
+
+        if (!hasStart) {
+            await mutator.insertPropertyTemplate(board, activeView, -1, {
+                id: Utils.createGuid(IDType.BlockID),
+                name: 'Mulai Pekerjaan',
+                type: 'date',
+                options: [],
+            })
+        }
+        if (!hasEnd) {
+            await mutator.insertPropertyTemplate(board, activeView, -1, {
+                id: Utils.createGuid(IDType.BlockID),
+                name: 'Selesai Pekerjaan',
+                type: 'date',
+                options: [],
+            })
+        }
+
+        const view = createBoardView()
+        view.title = intl.formatMessage({id: 'View.NewGanttTitle', defaultMessage: 'Gantt view'})
+        view.fields.viewType = 'gantt'
+        view.parentId = board.id
+        view.boardId = board.id
+        view.fields.visiblePropertyIds = [Constants.titleColumnId]
+
+        const oldViewId = activeView.id
+
+        // Find first date property
+        view.fields.dateDisplayPropertyId = board.cardProperties.find((o: IPropertyTemplate) => o.type === 'date')?.id
+
+        mutator.insertBlock(
+            view.boardId,
+            view,
+            'add view',
+            async (block: Block) => {
+                // This delay is needed because WSClient has a default 100 ms notification delay before updates
+                setTimeout(() => {
+                    Utils.log(`showView: ${block.id}`)
+                    showView(block.id)
+                }, 120)
+            },
+            async () => {
+                showView(oldViewId)
+            })
+    }, [props.board, props.activeView, props.intl, showView])
+
     const {views, intl} = props
 
     const duplicateViewText = intl.formatMessage({
@@ -236,6 +291,10 @@ const ViewMenu = (props: Props) => {
         id: 'View.Gallery',
         defaultMessage: 'Gallery',
     })
+    const ganttText = intl.formatMessage({
+        id: 'View.Gantt',
+        defaultMessage: 'Gantt',
+    })
 
     const iconForViewType = (viewType: IViewType) => {
         switch (viewType) {
@@ -243,6 +302,7 @@ const ViewMenu = (props: Props) => {
         case 'table': return <TableIcon/>
         case 'gallery': return <GalleryIcon/>
         case 'calendar': return <CalendarIcon/>
+        case 'gantt': return <GanttIcon/>
         default: return <div/>
         }
     }
@@ -314,6 +374,12 @@ const ViewMenu = (props: Props) => {
                                 name='Calendar'
                                 icon={<CalendarIcon/>}
                                 onClick={handleAddViewCalendar}
+                            />
+                            <Menu.Text
+                                id='gantt'
+                                name={ganttText}
+                                icon={<GanttIcon/>}
+                                onClick={handleAddViewGantt}
                             />
                         </div>
                     </Menu.SubMenu>

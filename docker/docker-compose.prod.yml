@@ -1,0 +1,65 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_DB: focalboard
+      POSTGRES_USER: focalboarduser
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change_me_securely}
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    restart: always
+    depends_on:
+      - db
+    environment:
+      - VIRTUAL_HOST=${DOMAIN:-localhost}
+      - LETSENCRYPT_HOST=${DOMAIN:-localhost}
+      - LETSENCRYPT_EMAIL=${EMAIL:-admin@example.com}
+    volumes:
+      - ./data/files:/opt/focalboard/data/files
+      - ./server_config.json:/opt/focalboard/config.json
+    expose:
+      - 8000
+    networks:
+      - backend
+      - proxy
+
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./data/certs:/etc/nginx/certs:ro
+      - ./data/vhost:/etc/nginx/vhost.d
+      - ./data/html:/usr/share/nginx/html
+    restart: always
+    networks:
+      - proxy
+
+  acme-companion:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/acme:/etc/acme.sh
+    restart: always
+    networks:
+      - proxy
+
+networks:
+  backend:
+  proxy:

@@ -65,6 +65,8 @@ func main() {
 		"",
 		"Location of the JSON config file",
 	)
+	pMigrateToDBType := flag.String("migrateToDBType", "", "Destination Database type for migration")
+	pMigrateToDBConfig := flag.String("migrateToDBConfig", "", "Destination Database config for migration")
 	flag.Parse()
 
 	config, err := config.ReadConfigFile(*pConfigFilePath)
@@ -110,6 +112,11 @@ func main() {
 
 	if pMonitorPid != nil && *pMonitorPid > 0 {
 		monitorPid(*pMonitorPid, logger)
+	}
+
+	if pMigrateToDBType != nil && *pMigrateToDBType != "" {
+		migrateDatabase(config, *pMigrateToDBType, *pMigrateToDBConfig, logger)
+		return
 	}
 
 	// Override config from commandline

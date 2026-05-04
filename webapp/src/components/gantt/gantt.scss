@@ -1,0 +1,196 @@
+// Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
+// See LICENSE.txt for license information.
+
+.Gantt {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: auto;
+    background: var(--center-panel-bg);
+    padding: 0; // Remove padding to allow header to be full width
+
+    .gantt-container {
+        display: flex;
+        flex-direction: column;
+        min-width: 1200px;
+        position: relative;
+    }
+
+    .gantt-header {
+        display: flex;
+        border-bottom: 1px solid var(--main-border-color);
+        background: var(--main-bg);
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        height: 50px;
+        align-items: center;
+
+        .gantt-header-label-column {
+            width: 250px;
+            min-width: 250px;
+            padding-left: 20px;
+            font-weight: 600;
+            color: var(--main-fg);
+            border-right: 1px solid var(--main-border-color);
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .gantt-header-cell {
+            flex: 1;
+            text-align: center;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--main-fg-light);
+            border-right: 1px solid var(--main-border-color-light);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-width: 140px;
+
+            &:last-child {
+                border-right: none;
+            }
+
+            .month {
+                font-weight: 700;
+                font-size: 10px;
+                margin-bottom: 2px;
+            }
+
+            .week {
+                font-size: 12px;
+            }
+        }
+    }
+
+    .gantt-body {
+        position: relative;
+    }
+
+    .gantt-row {
+        display: flex;
+        height: 48px;
+        align-items: center;
+        border-bottom: 1px solid var(--main-border-color-light);
+
+        &:hover {
+            background: var(--main-bg-hover);
+        }
+
+        .gantt-row-label {
+            width: 250px;
+            min-width: 250px;
+            font-size: 13px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 20px;
+            cursor: pointer;
+            color: var(--main-fg);
+            border-right: 1px solid var(--main-border-color-light);
+            height: 100%;
+            display: flex;
+            align-items: center;
+
+            &:hover {
+                color: var(--button-bg);
+                text-decoration: underline;
+            }
+        }
+
+        .gantt-row-timeline {
+            flex: 1;
+            position: relative;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            background-image: linear-gradient(to right, var(--main-border-color-light) 1px, transparent 1px);
+            background-size: calc((100% / var(--total-weeks))) 100%;
+        }
+
+        .gantt-bar {
+            position: absolute;
+            height: 28px;
+            background-color: var(--button-bg);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(93, 95, 239, 0.3);
+            transition: transform 0.2s, filter 0.2s, background-color 0.2s;
+            z-index: 5;
+
+            &:hover {
+                transform: scale(1.02);
+                filter: brightness(1.1);
+                z-index: 10;
+            }
+
+            &.overdue {
+                background: linear-gradient(135deg, #ff4d4f, #ff7875) !important;
+                box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3) !important;
+            }
+        }
+    }
+
+    .today-marker {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: #ff4d4f;
+        z-index: 100;
+        pointer-events: none;
+        box-shadow: 0 0 8px rgba(255, 77, 79, 0.4);
+
+        &::after {
+            content: "TODAY";
+            position: absolute;
+            top: 55px;
+            left: -18px;
+            font-size: 10px;
+            font-weight: 800;
+            color: #fff;
+            background: #ff4d4f;
+            padding: 2px 8px;
+            border-radius: 4px;
+            box-shadow: 0 4px 8px rgba(255, 77, 79, 0.3);
+            white-space: nowrap;
+        }
+    }
+
+    .no-date-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 300px;
+        color: var(--main-fg-light);
+        text-align: center;
+        
+        .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        h3 {
+            margin-bottom: 8px;
+            color: var(--main-fg);
+        }
+    }
+}
