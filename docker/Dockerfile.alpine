@@ -28,9 +28,9 @@ COPY . .
 WORKDIR /go/src/focalboard/server
 # Download dependencies first for caching
 RUN go mod download
-# Build static binary without CGO
-# Focalboard uses modernc.org/sqlite which is CGO-free
-RUN CGO_ENABLED=0 go build -v -ldflags="-s -w" -tags 'json1 sqlite3' -o ../bin/focalboard-server ./main
+# Build binary with CGO (required for sqlite3)
+# Focalboard uses mattn/go-sqlite3 which requires CGO
+RUN CGO_ENABLED=1 go build -v -ldflags="-s -w" -tags 'json1 sqlite3' -o ../bin/focalboard-server ./main
 
 # Stage 3: Final Image
 FROM alpine:3.18
